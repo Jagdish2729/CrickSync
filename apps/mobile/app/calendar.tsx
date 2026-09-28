@@ -1,5 +1,5 @@
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { getMatches, SavedMatch } from "../lib/matches";
 import { router } from "expo-router";
 
@@ -15,8 +15,10 @@ function formatHour(hour:number){if(hour===0)return "12 AM";if(hour===12)return 
 export default function CalendarScreen(){
  const [mode,setMode]=useState<Mode>("WEEK");
  const [matches,setMatches]=useState<SavedMatch[]>([]);
+ const timeScrollRef=useRef<ScrollView>(null);
  const today=useMemo(()=>new Date(),[]);
  useEffect(()=>{getMatches().then(setMatches);},[]);
+ useEffect(()=>{const timer=setTimeout(()=>timeScrollRef.current?.scrollTo({y:5*64,animated:false}),100);return()=>clearTimeout(timer);},[]);
  const weekStart=useMemo(()=>startOfSundayWeek(today),[today]);
  const weekDays=useMemo(()=>Array.from({length:7},(_,i)=>{const d=new Date(weekStart);d.setDate(weekStart.getDate()+i);return d}),[weekStart]);
  const monthDays=useMemo(()=>{const first=new Date(today.getFullYear(),today.getMonth(),1);const start=startOfSundayWeek(first);return Array.from({length:42},(_,i)=>{const d=new Date(start);d.setDate(start.getDate()+i);return d});},[today]);
@@ -29,7 +31,7 @@ export default function CalendarScreen(){
   <View style={styles.switch}><Pressable onPress={()=>setMode("WEEK")} style={[styles.switchItem,mode==="WEEK"&&styles.switchActive]}><Text style={[styles.switchText,mode==="WEEK"&&styles.switchTextActive]}>Week</Text></Pressable><Pressable onPress={()=>setMode("MONTH")} style={[styles.switchItem,mode==="MONTH"&&styles.switchActive]}><Text style={[styles.switchText,mode==="MONTH"&&styles.switchTextActive]}>Month</Text></Pressable></View>
   <Text style={styles.range}>{range}</Text>
   {mode==="WEEK" ? <View style={styles.calendarWrap}><View style={styles.daysHeader}><View style={styles.timeGutter}/>{weekDays.map(d=><View key={d.toISOString()} style={[styles.dayHeader,sameDay(d,today)&&styles.todayHeader]}><Text style={styles.dayName}>{dayNames[d.getDay()]}</Text><Text style={[styles.dayNumber,sameDay(d,today)&&styles.todayNumber]}>{d.getDate()}</Text></View>)}</View>
-   <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.timeBody}>{hours.map(hour=><View key={hour} style={styles.hourRow}><View style={styles.timeLabel}><Text style={styles.timeText}>{formatHour(hour)}</Text></View>{weekDays.map(date=>{
+   <ScrollView ref={timeScrollRef} showsVerticalScrollIndicator={false} contentContainerStyle={styles.timeBody}>{hours.map(hour=><View key={hour} style={styles.hourRow}><View style={styles.timeLabel}><Text style={styles.timeText}>{formatHour(hour)}</Text></View>{weekDays.map(date=>{
     const match=matches.find(m=>{const d=new Date(m.startsAt);return sameDay(d,date)&&d.getHours()===hour;});
     return <Pressable key={date.toISOString()+hour} onPress={()=>openSlot(date,hour)} style={({pressed})=>[styles.slot,sameDay(date,today)&&styles.todaySlot,pressed&&styles.slotPressed]}>
       <View style={styles.slotLine}/>
