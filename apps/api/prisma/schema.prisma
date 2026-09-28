@@ -34,6 +34,8 @@ model User {
   phone           String           @unique
   name            String?
   city            String?
+  roles           String[] @default([])
+  activeRole      String   @default("PLAYER")
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   teams           Team[]           @relation("CaptainTeams")
