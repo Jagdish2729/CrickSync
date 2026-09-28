@@ -1,16 +1,18 @@
 import { Keyboard, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View } from "react-native";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { router } from "expo-router";
 
 export default function ProfileScreen() {
  const [name,setName]=useState("");const [city,setCity]=useState("");
+ const cityRef=useRef<TextInput>(null);
+ const focusCity=()=>cityRef.current?.focus();
  const next=()=>{if(name.trim()&&city.trim()){Keyboard.dismiss();router.push("/onboarding/role")}};
  return <SafeAreaView style={styles.container}><View style={styles.content}>
   <View style={styles.progress}><View style={styles.progressOn}/><View/><View/></View>
   <Text style={styles.step}>01 / 02</Text><Text style={styles.title}>Tell us who{"\n"}you are.</Text>
   <Text style={styles.subtitle}>Let's create your cricket identity. Keep it simple.</Text>
-  <View style={styles.field}><Text style={styles.label}>YOUR NAME</Text><TextInput value={name} onChangeText={setName} placeholder="e.g. Jagdish Negi" placeholderTextColor="#666C78" style={styles.input} returnKeyType="next" blurOnSubmit={false}/></View>
-  <View style={styles.field}><Text style={styles.label}>CITY</Text><TextInput value={city} onChangeText={setCity} placeholder="e.g. Delhi NCR" placeholderTextColor="#666C78" style={styles.input} returnKeyType="done" blurOnSubmit onSubmitEditing={next}/></View>
+  <View style={styles.field}><Text style={styles.label}>YOUR NAME</Text><TextInput value={name} onChangeText={setName} placeholder="e.g. Jagdish Negi" placeholderTextColor="#666C78" style={styles.input} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={focusCity}/></View>
+  <View style={styles.field}><Text style={styles.label}>CITY</Text><TextInput ref={cityRef} value={city} onChangeText={setCity} placeholder="e.g. Delhi NCR" placeholderTextColor="#666C78" style={styles.input} returnKeyType="done" blurOnSubmit onSubmitEditing={next}/></View>
   <Pressable onPress={next} disabled={!name.trim()||!city.trim()} style={[styles.button,(!name.trim()||!city.trim())&&styles.disabled]}><Text style={styles.buttonText}>Next step  →</Text></Pressable>
  </View></SafeAreaView>;
 }
