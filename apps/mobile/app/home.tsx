@@ -6,7 +6,7 @@ import { router } from "expo-router";
 
 export default function HomeScreen(){
  const [matches,setMatches]=useState<Awaited<ReturnType<typeof getMatches>>>([]);
- const refreshMatches=useCallback(()=>{getMatches().then(all=>{const now=Date.now();setMatches(all.filter(m=>{const t=new Date(m.startsAt).getTime();return Number.isFinite(t)&&t>now;}).sort((a,b)=>new Date(a.startsAt).getTime()-new Date(b.startsAt).getTime()));});},[]);
+ const refreshMatches=useCallback(()=>{getMatches().then(all=>{const upcoming=all.filter(m=>{const t=Date.parse(m.startsAt);return !Number.isNaN(t)&&t>Date.now();}).sort((a,b)=>Date.parse(a.startsAt)-Date.parse(b.startsAt));setMatches(upcoming);});},[]);
  useFocusEffect(useCallback(()=>{refreshMatches();const timer=setInterval(refreshMatches,30000);return()=>clearInterval(timer);},[refreshMatches]));
  return <SafeAreaView style={styles.container}><View style={styles.content}>
   <View style={styles.top}><View><Text style={styles.eyebrow}>GOOD TO HAVE YOU</Text><Text style={styles.brand}>CrickSync <Text style={styles.dot}>●</Text></Text></View><View style={styles.avatar}><Text style={styles.avatarText}>J</Text></View></View>
