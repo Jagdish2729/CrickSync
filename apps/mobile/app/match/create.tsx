@@ -2,7 +2,7 @@ import { SafeAreaView, StyleSheet, Text, View, Pressable } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 
 export default function CreateMatchScreen(){
- const {date,time}=useLocalSearchParams<{date?:string;time?:string;timestamp?:string}>();
+ const {date,time,timestamp}=useLocalSearchParams<{date?:string;time?:string;timestamp?:string}>();
  return <SafeAreaView style={styles.container}><View style={styles.content}>
   <Pressable onPress={()=>router.back()}><Text style={styles.back}>‹  Calendar</Text></Pressable>
   <Text style={styles.eyebrow}>NEW MATCH</Text><Text style={styles.title}>Schedule a game.</Text>
