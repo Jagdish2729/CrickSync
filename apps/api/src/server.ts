@@ -71,7 +71,9 @@ app.get("/me", auth, async (req: AuthedRequest, res) => {
 app.patch("/me", auth, async (req: AuthedRequest, res) => {
   const user = await prisma.user.update({ where: { id: req.userId }, data: {
     name: typeof req.body.name === "string" ? req.body.name.trim() : undefined,
-    city: typeof req.body.city === "string" ? req.body.city.trim() : undefined
+    city: typeof req.body.city === "string" ? req.body.city.trim() : undefined,
+    activeRole: req.body.role === "CAPTAIN" ? "CAPTAIN" : req.body.role === "PLAYER" ? "PLAYER" : undefined,
+    ...(req.body.role === "CAPTAIN" || req.body.role === "PLAYER" ? { roles: { push: req.body.role } } : {})
   }});
   res.json({ user });
 });
