@@ -1,9 +1,11 @@
 import { Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
 import { useState } from "react";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
+import { saveUser } from "../../lib/auth";
 type Role="PLAYER"|"CAPTAIN";
 
 export default function RoleScreen(){
+ const {phone,name,city}=useLocalSearchParams<{phone?:string;name?:string;city?:string}>();
  const [role,setRole]=useState<Role>("PLAYER");
  return <SafeAreaView style={styles.container}><View style={styles.content}>
   <View style={styles.progress}><View style={styles.done}/><View style={styles.done}/><View style={styles.active}/></View>
@@ -15,7 +17,7 @@ export default function RoleScreen(){
   <Pressable onPress={()=>setRole("CAPTAIN")} style={[styles.card,role==="CAPTAIN"&&styles.selected]}>
    <View style={styles.icon}><Text style={styles.iconText}>C</Text></View><View style={styles.copy}><Text style={styles.cardTitle}>Captain</Text><Text style={styles.cardText}>Build teams, organise matches & call the shots.</Text></View><Text style={styles.radio}>{role==="CAPTAIN"?"●":"○"}</Text>
   </Pressable>
-  <Pressable onPress={()=>router.replace("/home")} style={styles.button}><Text style={styles.buttonText}>Let's go  →</Text></Pressable>
+  <Pressable onPress={async()=>{if(!phone||!name||!city)return;await saveUser({phone,name,city,role});router.replace("/home")}} style={styles.button}><Text style={styles.buttonText}>Let's go  →</Text></Pressable>
  </View></SafeAreaView>;
 }
 const styles=StyleSheet.create({
