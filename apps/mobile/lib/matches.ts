@@ -11,7 +11,6 @@ export type SavedMatch = {
   ball: "WHITE" | "RED";
   overs: string;
   teamId?: string;
-  opponent?: string;
   stage?: string;
   playerIds?: string[];
 };
