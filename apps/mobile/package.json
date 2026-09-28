@@ -15,7 +15,10 @@
     "react": "19.2.3",
     "react-native": "0.86.3",
     "react-native-safe-area-context": "5.7.0",
-    "@react-native-async-storage/async-storage": "~2.2.0"
+    "@react-native-async-storage/async-storage": "~2.2.0",
+    "expo-notifications": "~0.32.15",
+    "expo-device": "~8.1.0",
+    "expo-secure-store": "~15.0.7"
   },
   "devDependencies": {
     "@types/react": "~19.2.4",
