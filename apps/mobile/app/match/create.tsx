@@ -6,9 +6,9 @@ export default function CreateMatchScreen(){
  return <SafeAreaView style={styles.container}><View style={styles.content}>
   <Pressable onPress={()=>router.back()}><Text style={styles.back}>‹  Calendar</Text></Pressable>
   <Text style={styles.eyebrow}>NEW MATCH</Text><Text style={styles.title}>Schedule a game.</Text>
-  <Text style={styles.subtitle}>You picked a slot from your calendar. Finish the match details here.</Text>
+  <Text style={styles.subtitle}>You picked a slot from your calendar. Confirm it and add the match details next.</Text>
   <View style={styles.selected}><Text style={styles.label}>SELECTED SLOT</Text><Text style={styles.value}>{date||"Selected date"}</Text><Text style={styles.time}>{time||"Selected time"}</Text></View>
-  <Pressable style={styles.button}><Text style={styles.buttonText}>Continue  →</Text></Pressable>
+  <Pressable onPress={()=>router.push({pathname:"/match/details",params:{date,time}})} style={styles.button}><Text style={styles.buttonText}>Continue  →</Text></Pressable>
  </View></SafeAreaView>;
 }
 const styles=StyleSheet.create({
