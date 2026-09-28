@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { Keyboard, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
+import { saveUser } from "../../lib/auth";
 
 export default function OtpScreen() {
   const { phone } = useLocalSearchParams<{ phone: string }>();
   const [otp,setOtp]=useState(""); const [seconds,setSeconds]=useState(30);
   const inputRef=useRef<TextInput>(null);
   useEffect(()=>{const timer=setInterval(()=>setSeconds(v=>v>0?v-1:0),1000);return()=>clearInterval(timer)},[]);
-  const verify=()=>{if(otp.length===6){Keyboard.dismiss();router.replace("/onboarding/profile")}};
+  const verify=()=>{if(otp.length===6){Keyboard.dismiss();router.replace({pathname:"/onboarding/profile",params:{phone}})}};
   return <SafeAreaView style={styles.container}><View style={styles.content}>
     <Pressable onPress={()=>router.back()}><Text style={styles.back}>‹  Back</Text></Pressable>
     <View style={styles.badge}><Text style={styles.badgeText}>VERIFY</Text></View>
