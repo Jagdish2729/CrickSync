@@ -17,22 +17,46 @@ export type Team = {
   createdAt: string;
 };
 
-const KEY = "cricksync.team";
-type Listener = (team: Team | null) => void;
+const KEY = "cricksync.teams";
+const LEGACY_KEY = "cricksync.team";
+type Listener = (teams: Team[]) => void;
 const listeners = new Set<Listener>();
 
-function notify(team: Team | null) { listeners.forEach(listener => listener(team)); }
+function notify(teams: Team[]) { listeners.forEach(listener => listener(teams)); }
 
-export async function getTeam(): Promise<Team | null> {
+export async function getTeams(): Promise<Team[]> {
   try {
     const raw = await AsyncStorage.getItem(KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch { return null; }
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+    const legacy = await AsyncStorage.getItem(LEGACY_KEY);
+    if (legacy) {
+      const team = JSON.parse(legacy) as Team;
+      if (team?.id) {
+        await AsyncStorage.setItem(KEY, JSON.stringify([team]));
+        return [team];
+      }
+    }
+    return [];
+  } catch { return []; }
+}
+
+export async function getTeam(): Promise<Team | null> {
+  const teams = await getTeams();
+  return teams[0] || null;
+}
+
+export async function saveTeams(teams: Team[]): Promise<void> {
+  await AsyncStorage.setItem(KEY, JSON.stringify(teams));
+  notify(teams);
 }
 
 export async function saveTeam(team: Team): Promise<void> {
-  await AsyncStorage.setItem(KEY, JSON.stringify(team));
-  notify(team);
+  const teams = await getTeams();
+  const updated = [team, ...teams.filter(item => item.id !== team.id)];
+  await saveTeams(updated);
 }
 
 export async function createTeam(name: string, captainPhone: string): Promise<Team> {
@@ -43,12 +67,14 @@ export async function createTeam(name: string, captainPhone: string): Promise<Te
     players: [],
     createdAt: new Date().toISOString()
   };
-  await saveTeam(team);
+  const teams = await getTeams();
+  await saveTeams([team, ...teams]);
   return team;
 }
 
-export async function addTeamPlayer(phone: string): Promise<Team | null> {
-  const team = await getTeam();
+export async function addTeamPlayer(teamId: string, phone: string): Promise<Team | null> {
+  const teams = await getTeams();
+  const team = teams.find(item => item.id === teamId);
   if (!team) return null;
   const normalized = phone.replace(/\D/g, "");
   if (!normalized || team.players.some(player => player.phone === normalized)) return team;
