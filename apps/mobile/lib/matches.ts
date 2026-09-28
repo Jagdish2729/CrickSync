@@ -13,11 +13,24 @@ export type SavedMatch = {
 };
 
 const KEY = "cricksync.matches";
+type Listener = (matches: SavedMatch[]) => void;
+const listeners = new Set<Listener>();
+
+function notify(matches: SavedMatch[]) {
+  listeners.forEach(listener => listener(matches));
+}
+
+export function subscribeMatches(listener: Listener): () => void {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
 
 export async function getMatches(): Promise<SavedMatch[]> {
   try {
     const raw = await AsyncStorage.getItem(KEY);
-    return raw ? JSON.parse(raw) : [];
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
   }
@@ -25,13 +38,14 @@ export async function getMatches(): Promise<SavedMatch[]> {
 
 export async function saveMatch(match: SavedMatch): Promise<void> {
   const matches = await getMatches();
-  await AsyncStorage.setItem(KEY, JSON.stringify([match, ...matches]));
+  const updated = [match, ...matches.filter(item => item.id !== match.id)];
+  await AsyncStorage.setItem(KEY, JSON.stringify(updated));
+  notify(updated);
 }
 
 export async function deleteMatch(id: string): Promise<void> {
   const matches = await getMatches();
-  await AsyncStorage.setItem(
-    KEY,
-    JSON.stringify(matches.filter(match => match.id !== id))
-  );
+  const updated = matches.filter(match => match.id !== id);
+  await AsyncStorage.setItem(KEY, JSON.stringify(updated));
+  notify(updated);
 }
