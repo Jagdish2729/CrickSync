@@ -3,43 +3,31 @@ import { useMemo, useState } from "react";
 import { router } from "expo-router";
 
 type Mode = "WEEK" | "MONTH";
-
 const monthNames=["January","February","March","April","May","June","July","August","September","October","November","December"];
 const dayNames=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-const hours=Array.from({length:15},(_,i)=>i+7);
-
+const hours=Array.from({length:24},(_,i)=>i);
 function startOfSundayWeek(date:Date){const d=new Date(date);d.setHours(0,0,0,0);d.setDate(d.getDate()-d.getDay());return d;}
 function sameDay(a:Date,b:Date){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();}
 function formatDate(d:Date){return `${d.getDate()} ${monthNames[d.getMonth()].slice(0,3)}`;}
+function formatHour(hour:number){if(hour===0)return "12 AM";if(hour===12)return "12 PM";return `${hour>12?hour-12:hour} ${hour<12?"AM":"PM"}`;}
 
 export default function CalendarScreen(){
- const [mode,setMode]=useState<Mode>("WEEK");
- const today=useMemo(()=>new Date(),[]);
+ const [mode,setMode]=useState<Mode>("WEEK"); const today=useMemo(()=>new Date(),[]);
  const weekStart=useMemo(()=>startOfSundayWeek(today),[today]);
  const weekDays=useMemo(()=>Array.from({length:7},(_,i)=>{const d=new Date(weekStart);d.setDate(weekStart.getDate()+i);return d}),[weekStart]);
  const monthDays=useMemo(()=>{const first=new Date(today.getFullYear(),today.getMonth(),1);const start=startOfSundayWeek(first);return Array.from({length:42},(_,i)=>{const d=new Date(start);d.setDate(start.getDate()+i);return d});},[today]);
  const weekEnd=new Date(weekStart);weekEnd.setDate(weekStart.getDate()+6);
  const range=mode==="WEEK"?`${formatDate(weekStart)} — ${formatDate(weekEnd)}`:`${monthNames[today.getMonth()]} ${today.getFullYear()}`;
-
- const openSlot=(date:Date,hour:number)=>{
-   const selected=new Date(date);selected.setHours(hour,0,0,0);
-   router.push({pathname:"/match/create",params:{date:selected.toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short",year:"numeric"}),time:selected.toLocaleTimeString("en-IN",{hour:"numeric",minute:"2-digit"})}});
- };
+ const openSlot=(date:Date,hour:number)=>{const selected=new Date(date);selected.setHours(hour,0,0,0);router.push({pathname:"/match/create",params:{date:selected.toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short",year:"numeric"}),time:selected.toLocaleTimeString("en-IN",{hour:"numeric",minute:"2-digit"})}});};
 
  return <SafeAreaView style={styles.container}><View style={styles.content}>
   <View style={styles.header}><Pressable onPress={()=>router.back()}><Text style={styles.back}>‹</Text></Pressable><View style={styles.headerCopy}><Text style={styles.eyebrow}>MY CRICKET</Text><Text style={styles.title}>Calendar</Text></View></View>
   <View style={styles.switch}><Pressable onPress={()=>setMode("WEEK")} style={[styles.switchItem,mode==="WEEK"&&styles.switchActive]}><Text style={[styles.switchText,mode==="WEEK"&&styles.switchTextActive]}>Week</Text></Pressable><Pressable onPress={()=>setMode("MONTH")} style={[styles.switchItem,mode==="MONTH"&&styles.switchActive]}><Text style={[styles.switchText,mode==="MONTH"&&styles.switchTextActive]}>Month</Text></Pressable></View>
   <Text style={styles.range}>{range}</Text>
-  {mode==="WEEK" ? <View style={styles.calendarWrap}>
-   <View style={styles.daysHeader}><View style={styles.timeGutter}/>{weekDays.map(d=><View key={d.toISOString()} style={[styles.dayHeader,sameDay(d,today)&&styles.todayHeader]}><Text style={styles.dayName}>{dayNames[d.getDay()]}</Text><Text style={[styles.dayNumber,sameDay(d,today)&&styles.todayNumber]}>{d.getDate()}</Text></View>)}</View>
-   <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.timeBody}>
-    {hours.map(hour=><View key={hour} style={styles.hourRow}>
-      <View style={styles.timeLabel}><Text style={styles.timeText}>{hour===12?12:hour>12?hour-12:hour} {hour<12?"AM":"PM"}</Text></View>
-      {weekDays.map(date=><Pressable key={date.toISOString()+hour} onPress={()=>openSlot(date,hour)} style={({pressed})=>[styles.slot,sameDay(date,today)&&styles.todaySlot,pressed&&styles.slotPressed]}><View style={styles.slotLine}/></Pressable>)}
-    </View>)}
-   </ScrollView>
+  {mode==="WEEK" ? <View style={styles.calendarWrap}><View style={styles.daysHeader}><View style={styles.timeGutter}/>{weekDays.map(d=><View key={d.toISOString()} style={[styles.dayHeader,sameDay(d,today)&&styles.todayHeader]}><Text style={styles.dayName}>{dayNames[d.getDay()]}</Text><Text style={[styles.dayNumber,sameDay(d,today)&&styles.todayNumber]}>{d.getDate()}</Text></View>)}</View>
+   <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.timeBody}>{hours.map(hour=><View key={hour} style={styles.hourRow}><View style={styles.timeLabel}><Text style={styles.timeText}>{formatHour(hour)}</Text></View>{weekDays.map(date=><Pressable key={date.toISOString()+hour} onPress={()=>openSlot(date,hour)} style={({pressed})=>[styles.slot,sameDay(date,today)&&styles.todaySlot,pressed&&styles.slotPressed]}><View style={styles.slotLine}/></Pressable>)}</View>)}</ScrollView>
   </View> : <ScrollView showsVerticalScrollIndicator={false}><View style={styles.monthCard}><View style={styles.monthHeader}>{dayNames.map(d=><Text key={d} style={styles.monthDayName}>{d[0]}</Text>)}</View><View style={styles.grid}>{monthDays.map(date=>{const inMonth=date.getMonth()===today.getMonth();const isToday=sameDay(date,today);return <Pressable key={date.toISOString()} onPress={()=>openSlot(date,9)} style={styles.cell}><View style={[styles.cellCircle,isToday&&styles.todayCircle]}><Text style={[styles.cellText,!inMonth&&styles.muted,isToday&&styles.todayCellText]}>{date.getDate()}</Text></View></Pressable>})}</View></View></ScrollView>}
-  <View style={styles.footer}><Text style={styles.footerDot}>●</Text><Text style={styles.footerText}>Tap any time slot to schedule a match.</Text></View>
+  <View style={styles.footer}><Text style={styles.footerDot}>●</Text><Text style={styles.footerText}>12 AM — 11 PM · Tap any slot to schedule.</Text></View>
  </View></SafeAreaView>;
 }
 const styles=StyleSheet.create({
