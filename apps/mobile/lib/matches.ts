@@ -10,6 +10,10 @@ export type SavedMatch = {
   ground: string;
   ball: "WHITE" | "RED";
   overs: string;
+  teamId?: string;
+  opponent?: string;
+  stage?: string;
+  playerIds?: string[];
 };
 
 const KEY = "cricksync.matches";
