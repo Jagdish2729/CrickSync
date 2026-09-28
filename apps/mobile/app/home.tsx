@@ -19,7 +19,7 @@ export default function HomeScreen(){
  const changeMode=async(role:"PLAYER"|"CAPTAIN")=>{const updated=await switchRole(role);if(updated)setUser(updated);router.replace(role==="CAPTAIN"?"/captain/home":"/home");};
  const refresh=useCallback(async()=>{
   const [all,currentUser]=await Promise.all([getMatches(),getUser()]);
-  const upcoming=all.map(match=>({match,start:matchStart(match)})).sort((a,b)=>a.start-b.start).map(x=>x.match);
+  const upcoming=all.map(match=>({match,start:matchStart(match)})).filter(x=>x.start>Date.now()).sort((a,b)=>a.start-b.start).map(x=>x.match);
   setMatches(upcoming);setTotalMatches(all.length);setUser(currentUser);
  },[]);
  useEffect(()=>{refresh();const unsubscribe=subscribeMatches(()=>refresh());const timer=setInterval(refresh,30000);return()=>{unsubscribe();clearInterval(timer);};},[refresh]);
