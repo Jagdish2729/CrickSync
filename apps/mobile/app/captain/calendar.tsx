@@ -1,6 +1,7 @@
 import { Alert, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { deleteMatch, getMatches, SavedMatch } from "../../lib/captainMatches";
+import { deleteCaptainMatch, getCaptainMatches } from "../../lib/captainMatches";
+import type { SavedMatch } from "../../lib/matches";
 import { router } from "expo-router";
 
 type Mode = "WEEK" | "MONTH";
@@ -17,8 +18,8 @@ export default function CalendarScreen(){
  const [matches,setMatches]=useState<SavedMatch[]>([]);
  const timeScrollRef=useRef<ScrollView>(null);
  const today=useMemo(()=>new Date(),[]);
- const removeMatch=(match:SavedMatch)=>{Alert.alert("Delete match?",`${match.myTeam} · ${match.time}`,[{text:"Cancel",style:"cancel"},{text:"Delete",style:"destructive",onPress:async()=>{await deleteMatch(match.id);setMatches(current=>current.filter(item=>item.id!==match.id));}}]);};
- useEffect(()=>{getMatches().then(setMatches);},[]);
+ const removeMatch=(match:SavedMatch)=>{Alert.alert("Delete match?",`${match.myTeam} · ${match.time}`,[{text:"Cancel",style:"cancel"},{text:"Delete",style:"destructive",onPress:async()=>{await deleteCaptainMatch(match.id);setMatches(current=>current.filter(item=>item.id!==match.id));}}]);};
+ useEffect(()=>{getCaptainMatches().then(setMatches);},[]);
  useEffect(()=>{const timer=setTimeout(()=>timeScrollRef.current?.scrollTo({y:5*64,animated:false}),100);return()=>clearTimeout(timer);},[]);
  const weekStart=useMemo(()=>startOfSundayWeek(today),[today]);
  const weekDays=useMemo(()=>Array.from({length:7},(_,i)=>{const d=new Date(weekStart);d.setDate(weekStart.getDate()+i);return d}),[weekStart]);
