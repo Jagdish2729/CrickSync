@@ -4,6 +4,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { saveMatch } from "../../lib/matches";
 import { saveCaptainMatch } from "../../lib/captainMatches";
 import { getTeams, Team } from "../../lib/teams";
+import { createMatchInvitations } from "../../lib/invitations";
 
 type BallType = "WHITE" | "RED";
 const stages = ["League Match", "Quarterfinal", "Semifinal", "Qualifier 1", "Eliminator", "Qualifier 2", "Final"];
@@ -40,7 +41,7 @@ export default function MatchDetailsScreen(){
  const save=async()=>{
     if((isCaptain?!selectedTeam?.name:!myTeam.trim())||!ground.trim()||!timestamp) return;
    Keyboard.dismiss();
-   await (isCaptain?saveCaptainMatch:saveMatch)({
+   const savedMatch = {
      id:Date.now().toString(),
      startsAt:new Date(Number(timestamp)).toISOString(),
      date:date||"",
@@ -50,7 +51,9 @@ export default function MatchDetailsScreen(){
      ball,
      overs:overs.trim(),
      ...(isCaptain?{teamId:selectedTeam!.id,opponent:opponent.trim(),stage,playerIds:selectedPlayers}: {})
-   });
+   };
+   await (isCaptain?saveCaptainMatch:saveMatch)(savedMatch);
+   if(isCaptain && selectedTeam) await createMatchInvitations(savedMatch, selectedTeam.players);
    router.replace(isCaptain?"/captain/home":"/home");
  };
 
