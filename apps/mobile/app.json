@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "name": "CrickSync",
+    "slug": "cricksync",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "cricksync",
+    "plugins": ["expo-router"],
+    "android": {
+      "package": "com.cricksync.app"
+    },
+    "ios": {
+      "bundleIdentifier": "com.cricksync.app"
+    }
+  }
+}
