@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TeamMemberStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+enum MatchStatus {
+  SCHEDULED
+  CANCELLED
+}
+
+enum BallType {
+  WHITE
+  RED
+}
+
+model User {
+  id              String           @id @default(cuid())
+  phone           String           @unique
+  name            String?
+  city            String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  teams           Team[]           @relation("CaptainTeams")
+  memberships     TeamMember[]
+  createdMatches  Match[]          @relation("CreatedMatches")
+  invitations     MatchInvitation[]
+  pushTokens      PushToken[]
+}
+
+model OtpChallenge {
+  id          String   @id @default(cuid())
+  phone       String
+  codeHash    String
+  expiresAt   DateTime
+  attempts    Int      @default(0)
+  consumedAt  DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([phone, createdAt])
+}
+
+model Team {
+  id          String       @id @default(cuid())
+  name        String
+  captainId   String
+  captain     User         @relation("CaptainTeams", fields: [captainId], references: [id])
+  members     TeamMember[]
+  matches     Match[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([captainId])
+}
+
+model TeamMember {
+  id        String           @id @default(cuid())
+  teamId    String
+  userId    String
+  status    TeamMemberStatus @default(PENDING)
+  team      Team             @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@unique([teamId, userId])
+  @@index([userId, status])
+}
+
+model Match {
+  id           String        @id @default(cuid())
+  teamId       String?
+  createdById  String
+  opponent     String?
+  stage        String?
+  startsAt     DateTime
+  endsAt       DateTime
+  ground       String
+  ball         BallType
+  overs        Int?
+  status       MatchStatus   @default(SCHEDULED)
+  team         Team?         @relation(fields: [teamId], references: [id])
+  createdBy    User          @relation("CreatedMatches", fields: [createdById], references: [id])
+  invitations  MatchInvitation[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([startsAt, endsAt])
+  @@index([createdById])
+}
+
+model MatchInvitation {
+  id          String           @id @default(cuid())
+  matchId     String
+  playerId    String
+  status      InvitationStatus @default(PENDING)
+  match       Match            @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  player      User             @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  createdAt   DateTime         @default(now())
+  respondedAt DateTime?
+
+  @@unique([matchId, playerId])
+  @@index([playerId, status])
+}
+
+model PushToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  platform  String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
