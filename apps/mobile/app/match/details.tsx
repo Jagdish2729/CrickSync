@@ -22,6 +22,7 @@ function Dropdown({label,value,placeholder,options,onSelect}:{label:string;value
 export default function MatchDetailsScreen(){
  const {date,time,timestamp,mode}=useLocalSearchParams<{date?:string;time?:string;timestamp?:string;mode?:string}>();
  const isCaptain=mode==="CAPTAIN";
+ const [myTeam,setMyTeam]=useState("");
  const [teams,setTeams]=useState<Team[]>([]);
  const [teamId,setTeamId]=useState("");
  const [ground,setGround]=useState("");
@@ -37,15 +38,14 @@ export default function MatchDetailsScreen(){
  const togglePlayer=(id:string)=>setSelectedPlayers(current=>current.includes(id)?current.filter(item=>item!==id):[...current,id]);
 
  const save=async()=>{
-   const myTeam=isCaptain?(selectedTeam?.name||""):ground?"" : "";
-   if((isCaptain?!selectedTeam?.name:!ground.trim())||!ground.trim()||!timestamp) return;
+    if((isCaptain?!selectedTeam?.name:!myTeam.trim())||!ground.trim()||!timestamp) return;
    Keyboard.dismiss();
    await (isCaptain?saveCaptainMatch:saveMatch)({
      id:Date.now().toString(),
      startsAt:new Date(Number(timestamp)).toISOString(),
      date:date||"",
      time:time||"",
-     myTeam:isCaptain?selectedTeam!.name:myTeam,
+     myTeam:isCaptain?selectedTeam!.name:myTeam.trim(),
      ground:ground.trim(),
      ball,
      overs:overs.trim(),
@@ -63,7 +63,7 @@ export default function MatchDetailsScreen(){
   <View style={styles.locked}><View><Text style={styles.lockedLabel}>DATE & TIME</Text><Text style={styles.lockedValue}>{date||"Selected date"}</Text><Text style={styles.lockedTime}>{time||"Selected time"}</Text></View><Text style={styles.lock}>LOCKED</Text></View>
 
   {isCaptain&&<Dropdown label="MY TEAM" value={selectedTeam?.name||""} placeholder="Select your team" options={teams.map(team=>team.name)} onSelect={name=>{const team=teams.find(item=>item.name===name);setTeamId(team?.id||"");setSelectedPlayers([]);}}/>}
-  {!isCaptain&&<View style={styles.field}><Text style={styles.label}>MY TEAM</Text><TextInput value={""} onChangeText={()=>{}} placeholder="e.g. Pahadi Panthers" placeholderTextColor="#666C78" style={styles.input} editable={false}/></View>}
+  {!isCaptain&&<View style={styles.field}><Text style={styles.label}>MY TEAM</Text><TextInput value={myTeam} onChangeText={setMyTeam} placeholder="e.g. Pahadi Panthers" placeholderTextColor="#666C78" style={styles.input} returnKeyType="next"/></View>}
 
   {isCaptain&&<View style={styles.field}><Text style={styles.label}>OPPONENT</Text><TextInput value={opponent} onChangeText={setOpponent} placeholder="e.g. Delhi Strikers" placeholderTextColor="#666C78" style={styles.input} returnKeyType="next"/></View>}
   {isCaptain&&<Dropdown label="MATCH TYPE" value={stage} placeholder="Select match type" options={stages} onSelect={setStage}/>}
@@ -82,7 +82,7 @@ export default function MatchDetailsScreen(){
 
   <View style={styles.field}><Text style={styles.label}>OVERS</Text><TextInput value={overs} onChangeText={v=>setOvers(v.replace(/\D/g,"").slice(0,3))} placeholder="e.g. 20" placeholderTextColor="#666C78" style={styles.input} keyboardType="number-pad" returnKeyType="done" onSubmitEditing={Keyboard.dismiss}/></View>
 
-  <Pressable onPress={save} disabled={!timestamp||!ground.trim()||(isCaptain&&!selectedTeam)} style={[styles.button,(!timestamp||!ground.trim()||(isCaptain&&!selectedTeam))&&styles.disabled]}><Text style={styles.buttonText}>Save match  →</Text></Pressable>
+  <Pressable onPress={save} disabled={!timestamp||!ground.trim()||(!isCaptain&&!myTeam.trim())||(isCaptain&&!selectedTeam)} style={[styles.button,(!timestamp||!ground.trim()||(!isCaptain&&!myTeam.trim())||(isCaptain&&!selectedTeam))&&styles.disabled]}><Text style={styles.buttonText}>Save match  →</Text></Pressable>
   <Text style={styles.note}>{isCaptain?"Players can be updated later from the match.":"You can add players and manage invites after saving the match."}</Text>
  </ScrollView></SafeAreaView>;
 }
