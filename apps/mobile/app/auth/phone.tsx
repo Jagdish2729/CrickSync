@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { Keyboard, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View } from "react-native";
 import { router } from "expo-router";
+import { api } from "../../lib/api";
 
 export default function PhoneScreen() {
   const [phone, setPhone] = useState("");
-  const continueToOtp = () => {
+  const continueToOtp = async () => {
     const digits = phone.replace(/\D/g, "");
     if (digits.length !== 10) return;
     Keyboard.dismiss();
+    await api("/auth/request-otp", { method: "POST", body: JSON.stringify({ phone: digits }) });
     router.push({ pathname: "/auth/otp", params: { phone: digits } });
   };
 
