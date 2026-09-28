@@ -1,7 +1,8 @@
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useFocusEffect } from "expo-router";
 import { router } from "expo-router";
-import { addTeamPlayer, getTeam, Team } from "../../lib/teams";
+import { addTeamPlayer, getTeam, Team, subscribeTeam } from "../../lib/teams";
 import { getUser } from "../../lib/auth";
 
 export default function CaptainTeamScreen() {
@@ -9,7 +10,9 @@ export default function CaptainTeamScreen() {
  const [phone,setPhone]=useState("");
  const [userPhone,setUserPhone]=useState("");
 
- useEffect(()=>{Promise.all([getTeam(),getUser()]).then(([t,u])=>{setTeam(t);setUserPhone(u?.phone||"");});},[]);
+ const refresh=useCallback(()=>{Promise.all([getTeam(),getUser()]).then(([t,u])=>{setTeam(t);setUserPhone(u?.phone||"");});},[]);
+ useEffect(()=>{refresh();const off=subscribeTeam(refresh);return off;},[refresh]);
+ useFocusEffect(useCallback(()=>{refresh();},[refresh]));
 
  const add=async()=>{
    const normalized=phone.replace(/\D/g,"");
