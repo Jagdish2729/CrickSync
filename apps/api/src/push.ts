@@ -8,7 +8,7 @@ export async function sendPushToUser(userId: string, message: PushMessage): Prom
 
   const response = await fetch("https://exp.host/--/api/v2/push/send", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(process.env.EXPO_ACCESS_TOKEN ? { Authorization: "Bearer " + process.env.EXPO_ACCESS_TOKEN } : {}) },
     body: JSON.stringify(tokens.map(item => ({
       to: item.token,
       sound: "default",
