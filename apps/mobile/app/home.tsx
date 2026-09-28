@@ -1,14 +1,19 @@
 import { Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { useCallback, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import { getMatches } from "../lib/matches";
 import { router } from "expo-router";
 
 export default function HomeScreen(){
+ const [matchCount,setMatchCount]=useState(0);
+ useFocusEffect(useCallback(()=>{getMatches().then(matches=>setMatchCount(matches.length));},[]));
  return <SafeAreaView style={styles.container}><View style={styles.content}>
   <View style={styles.top}><View><Text style={styles.eyebrow}>GOOD TO HAVE YOU</Text><Text style={styles.brand}>CrickSync <Text style={styles.dot}>●</Text></Text></View><View style={styles.avatar}><Text style={styles.avatarText}>J</Text></View></View>
   <Text style={styles.greeting}>Ready to{"\n"}play?</Text>
   <Pressable onPress={()=>router.push("/calendar")} style={({pressed})=>[styles.hero,pressed&&styles.pressed]}>
    <Text style={styles.heroLabel}>YOUR SCHEDULE</Text><Text style={styles.heroTitle}>See your cricket calendar.</Text><Text style={styles.heroText}>Check matches, availability and upcoming games in one place.</Text><View style={styles.line}/><Text style={styles.heroAction}>Open calendar  →</Text>
   </Pressable>
-  <View style={styles.row}><View style={styles.small}><Text style={styles.smallNumber}>0</Text><Text style={styles.smallLabel}>MATCHES</Text></View><View style={styles.small}><Text style={styles.smallNumber}>0</Text><Text style={styles.smallLabel}>TEAMS</Text></View><View style={styles.small}><Text style={styles.smallNumber}>0</Text><Text style={styles.smallLabel}>INVITES</Text></View></View>
+  <View style={styles.row}><View style={styles.small}><Text style={styles.smallNumber}>{matchCount}</Text><Text style={styles.smallLabel}>MATCHES</Text></View><View style={styles.small}><Text style={styles.smallNumber}>0</Text><Text style={styles.smallLabel}>TEAMS</Text></View><View style={styles.small}><Text style={styles.smallNumber}>0</Text><Text style={styles.smallLabel}>INVITES</Text></View></View>
  </View></SafeAreaView>;
 }
 const styles=StyleSheet.create({
