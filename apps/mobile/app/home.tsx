@@ -1,7 +1,7 @@
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useCallback, useEffect, useState } from "react";
 import { useFocusEffect } from "expo-router";
-import { getMatches, SavedMatch } from "../lib/matches";
+import { getMatches, SavedMatch, subscribeMatches } from "../lib/matches";
 import { getUser, CrickSyncUser } from "../lib/auth";
 import { router } from "expo-router";
 
@@ -19,7 +19,7 @@ export default function HomeScreen(){
   const upcoming=all.map(match=>({match,start:matchStart(match)})).filter(x=>x.start>Date.now()).sort((a,b)=>a.start-b.start).map(x=>x.match);
   setMatches(upcoming);setUser(currentUser);
  },[]);
- useEffect(()=>{refresh();const timer=setInterval(refresh,30000);return()=>clearInterval(timer);},[refresh]);
+ useEffect(()=>{refresh();const unsubscribe=subscribeMatches(()=>refresh());const timer=setInterval(refresh,30000);return()=>{unsubscribe();clearInterval(timer);};},[refresh]);
  useFocusEffect(useCallback(()=>{refresh();},[refresh]));
  return <SafeAreaView style={styles.container}><ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
   <View style={styles.top}><View><Text style={styles.eyebrow}>{user?.role==="CAPTAIN"?"CAPTAIN MODE":"PLAYER MODE"}</Text><Text style={styles.brand}>CrickSync <Text style={styles.dot}>●</Text></Text></View><Pressable onPress={()=>router.push("/account/role")} style={styles.avatar}><Text style={styles.avatarText}>{user?.name?.charAt(0)?.toUpperCase()||"J"}</Text></Pressable></View>
