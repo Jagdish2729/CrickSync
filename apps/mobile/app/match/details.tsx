@@ -8,13 +8,12 @@ type BallType="WHITE"|"RED";
 export default function MatchDetailsScreen(){
  const {date,time,timestamp}=useLocalSearchParams<{date?:string;time?:string;timestamp?:string}>();
  const [myTeam,setMyTeam]=useState("");
- const [opponent,setOpponent]=useState("");
  const [ground,setGround]=useState("");
  const [ball,setBall]=useState<BallType>("WHITE");
  const [overs,setOvers]=useState("");
 
  const save=async()=>{
-   if(myTeam.trim()&&opponent.trim()&&ground.trim()&&timestamp){
+   if(myTeam.trim()&&ground.trim()&&timestamp){
      Keyboard.dismiss();
      await saveMatch({
        id: Date.now().toString(),
@@ -22,7 +21,6 @@ export default function MatchDetailsScreen(){
        date:date||"",
        time:time||"",
        myTeam:myTeam.trim(),
-       opponent:opponent.trim(),
        ground:ground.trim(),
        ball,
        overs:overs.trim()
@@ -40,8 +38,7 @@ export default function MatchDetailsScreen(){
   <View style={styles.locked}><View><Text style={styles.lockedLabel}>DATE & TIME</Text><Text style={styles.lockedValue}>{date||"Selected date"}</Text><Text style={styles.lockedTime}>{time||"Selected time"}</Text></View><Text style={styles.lock}>LOCKED</Text></View>
 
   <View style={styles.field}><Text style={styles.label}>MY TEAM</Text><TextInput value={myTeam} onChangeText={setMyTeam} placeholder="e.g. Pahadi Panthers" placeholderTextColor="#666C78" style={styles.input} returnKeyType="next"/></View>
-  <View style={styles.field}><Text style={styles.label}>OPPOSITION</Text><TextInput value={opponent} onChangeText={setOpponent} placeholder="e.g. Delhi Strikers" placeholderTextColor="#666C78" style={styles.input} returnKeyType="next"/></View>
-  <View style={styles.field}><Text style={styles.label}>GROUND / VENUE</Text><TextInput value={ground} onChangeText={setGround} placeholder="e.g. Noida Cricket Ground" placeholderTextColor="#666C78" style={styles.input} returnKeyType="next"/></View>
+    <View style={styles.field}><Text style={styles.label}>GROUND / VENUE</Text><TextInput value={ground} onChangeText={setGround} placeholder="e.g. Noida Cricket Ground" placeholderTextColor="#666C78" style={styles.input} returnKeyType="next"/></View>
 
   <View style={styles.field}><Text style={styles.label}>BALL TYPE</Text>
    <View style={styles.options}>
@@ -52,7 +49,7 @@ export default function MatchDetailsScreen(){
 
   <View style={styles.field}><Text style={styles.label}>OVERS</Text><TextInput value={overs} onChangeText={v=>setOvers(v.replace(/\D/g,"").slice(0,3))} placeholder="e.g. 20" placeholderTextColor="#666C78" style={styles.input} keyboardType="number-pad" returnKeyType="done" onSubmitEditing={Keyboard.dismiss}/></View>
 
-  <Pressable onPress={save} disabled={!myTeam.trim()||!opponent.trim()||!ground.trim()||!timestamp} style={[styles.button,(!myTeam.trim()||!opponent.trim()||!ground.trim()||!timestamp)&&styles.disabled]}><Text style={styles.buttonText}>Save match  →</Text></Pressable>
+  <Pressable onPress={save} disabled={!myTeam.trim()||!ground.trim()||!timestamp} style={[styles.button,(!myTeam.trim()||!ground.trim()||!timestamp)&&styles.disabled]}><Text style={styles.buttonText}>Save match  →</Text></Pressable>
   <Text style={styles.note}>You can add players and manage invites after saving the match.</Text>
  </ScrollView></SafeAreaView>;
 }
