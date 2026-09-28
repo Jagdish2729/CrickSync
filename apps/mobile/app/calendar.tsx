@@ -36,7 +36,7 @@ export default function CalendarScreen(){
     const match=matches.find(m=>{const d=new Date(m.startsAt);return sameDay(d,date)&&d.getHours()===hour;});
     return <Pressable key={date.toISOString()+hour} onPress={()=>match?removeMatch(match):openSlot(date,hour)} style={({pressed})=>[styles.slot,sameDay(date,today)&&styles.todaySlot,pressed&&styles.slotPressed]}>
       <View style={styles.slotLine}/>
-      {match&&<View style={styles.event}><Text style={styles.eventTitle} numberOfLines={1}>{match.myTeam} vs {match.opponent}</Text><Text style={styles.eventMeta} numberOfLines={1}>{match.ground}</Text></View>}
+      {match&&<View style={styles.event}><Text style={styles.eventTitle} numberOfLines={1}>{match.myTeam}</Text><Text style={styles.eventMeta} numberOfLines={1}>{match.ground}</Text></View>}
     </Pressable>
   })}</View>)}</ScrollView>
   </View> : <ScrollView showsVerticalScrollIndicator={false}><View style={styles.monthCard}><View style={styles.monthHeader}>{dayNames.map(d=><Text key={d} style={styles.monthDayName}>{d[0]}</Text>)}</View><View style={styles.grid}>{monthDays.map(date=>{const inMonth=date.getMonth()===today.getMonth();const isToday=sameDay(date,today);return <Pressable key={date.toISOString()} onPress={()=>openSlot(date,9)} style={styles.cell}><View style={[styles.cellCircle,isToday&&styles.todayCircle]}><Text style={[styles.cellText,!inMonth&&styles.muted,isToday&&styles.todayCellText]}>{date.getDate()}</Text></View></Pressable>})}</View></View></ScrollView>}
