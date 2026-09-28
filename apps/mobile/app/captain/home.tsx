@@ -3,17 +3,19 @@ import { useCallback, useEffect, useState } from "react";
 import { router } from "expo-router";
 import { getUser, switchRole, CrickSyncUser } from "../../lib/auth";
 import { getMatches, SavedMatch, subscribeMatches } from "../../lib/matches";
+import { getTeam, Team } from "../../lib/teams";
 
 export default function CaptainHome(){
  const [user,setUser]=useState<CrickSyncUser|null>(null);
  const [matches,setMatches]=useState<SavedMatch[]>([]);
- const refresh=useCallback(async()=>{const [u,m]=await Promise.all([getUser(),getMatches()]);setUser(u);setMatches(m.sort((a,b)=>Date.parse(a.startsAt)-Date.parse(b.startsAt)));},[]);
+ const [team,setTeam]=useState<Team|null>(null);
+ const refresh=useCallback(async()=>{const [u,m,t]=await Promise.all([getUser(),getMatches(),getTeam()]);setUser(u);setMatches(m.sort((a,b)=>Date.parse(a.startsAt)-Date.parse(b.startsAt)));setTeam(t);},[]);
  useEffect(()=>{refresh();const off=subscribeMatches(()=>refresh());return off;},[refresh]);
  const changeMode=async(role:"PLAYER"|"CAPTAIN")=>{const u=await switchRole(role);if(u){setUser(u);router.replace("/home");}};
  return <SafeAreaView style={styles.container}><ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
   <View style={styles.top}><View><Text style={styles.eyebrow}>CAPTAIN MODE</Text><Text style={styles.brand}>CrickSync <Text style={styles.dot}>●</Text></Text></View><View style={styles.topActions}><Pressable onPress={()=>changeMode("PLAYER")} style={styles.modeSwitch}><Text style={styles.modeSwitchText}>PLAYER ↗</Text></Pressable><Pressable onPress={()=>router.push("/account/role")} style={styles.avatar}><Text style={styles.avatarText}>{user?.name?.charAt(0)?.toUpperCase()||"J"}</Text></Pressable></View></View>
   <Text style={styles.greeting}>Run your{"\n"}game.</Text>
-  <View style={styles.grid}><Pressable onPress={()=>router.push("/captain/team")} style={styles.card}><Text style={styles.cardIcon}>♟</Text><Text style={styles.cardTitle}>My team</Text><Text style={styles.cardText}>Build and manage your squad.</Text></Pressable><Pressable onPress={()=>router.push("/calendar")} style={[styles.card,styles.lime]}><Text style={styles.limeIcon}>＋</Text><Text style={styles.limeTitle}>Create match</Text><Text style={styles.limeText}>Schedule a new game.</Text></Pressable></View>
+  <View style={styles.grid}><Pressable onPress={()=>router.push(team?"/captain/team":"/captain/team/create")} style={styles.card}><Text style={styles.cardIcon}>♟</Text><Text style={styles.cardTitle}>{team?"My team":"Create your team"}</Text><Text style={styles.cardText}>{team?`${team.name} · ${team.players.length} players`:"Set up your squad first."}</Text></Pressable><Pressable onPress={()=>router.push("/calendar")} style={[styles.card,styles.lime]}><Text style={styles.limeIcon}>＋</Text><Text style={styles.limeTitle}>Create match</Text><Text style={styles.limeText}>Schedule a new game.</Text></Pressable></View>
   <View style={styles.stats}><View><Text style={styles.statNumber}>{matches.length}</Text><Text style={styles.statLabel}>MATCHES</Text></View><View><Text style={styles.statNumber}>0</Text><Text style={styles.statLabel}>TEAMS</Text></View><View><Text style={styles.statNumber}>0</Text><Text style={styles.statLabel}>INVITES</Text></View></View>
   <Text style={styles.section}>CAPTAIN TOOLS</Text>
   <Pressable style={styles.row} onPress={()=>router.push("/calendar")}><Text style={styles.rowIcon}>▦</Text><View style={styles.rowCopy}><Text style={styles.rowTitle}>Manage schedule</Text><Text style={styles.rowText}>View and manage your matches.</Text></View><Text style={styles.arrow}>→</Text></Pressable>
