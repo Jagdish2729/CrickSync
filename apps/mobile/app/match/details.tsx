@@ -1,21 +1,32 @@
 import { Keyboard, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
+import { saveMatch } from "../../lib/matches";
 
 type BallType="WHITE"|"RED";
 
 export default function MatchDetailsScreen(){
- const {date,time}=useLocalSearchParams<{date?:string;time?:string}>();
- const [matchName,setMatchName]=useState("");
+ const {date,time,timestamp}=useLocalSearchParams<{date?:string;time?:string;timestamp?:string}>();
  const [myTeam,setMyTeam]=useState("");
  const [opponent,setOpponent]=useState("");
  const [ground,setGround]=useState("");
  const [ball,setBall]=useState<BallType>("WHITE");
  const [overs,setOvers]=useState("");
 
- const save=()=>{
-   if(matchName.trim()&&myTeam.trim()&&opponent.trim()&&ground.trim()){
+ const save=async()=>{
+   if(myTeam.trim()&&opponent.trim()&&ground.trim()&&timestamp){
      Keyboard.dismiss();
+     await saveMatch({
+       id: Date.now().toString(),
+       startsAt:new Date(Number(timestamp)).toISOString(),
+       date:date||"",
+       time:time||"",
+       myTeam:myTeam.trim(),
+       opponent:opponent.trim(),
+       ground:ground.trim(),
+       ball,
+       overs:overs.trim()
+     });
      router.replace("/home");
    }
  };
@@ -28,7 +39,6 @@ export default function MatchDetailsScreen(){
 
   <View style={styles.locked}><View><Text style={styles.lockedLabel}>DATE & TIME</Text><Text style={styles.lockedValue}>{date||"Selected date"}</Text><Text style={styles.lockedTime}>{time||"Selected time"}</Text></View><Text style={styles.lock}>LOCKED</Text></View>
 
-  <View style={styles.field}><Text style={styles.label}>MATCH NAME</Text><TextInput value={matchName} onChangeText={setMatchName} placeholder="e.g. Sunday League" placeholderTextColor="#666C78" style={styles.input} returnKeyType="next"/></View>
   <View style={styles.field}><Text style={styles.label}>MY TEAM</Text><TextInput value={myTeam} onChangeText={setMyTeam} placeholder="e.g. Pahadi Panthers" placeholderTextColor="#666C78" style={styles.input} returnKeyType="next"/></View>
   <View style={styles.field}><Text style={styles.label}>OPPOSITION</Text><TextInput value={opponent} onChangeText={setOpponent} placeholder="e.g. Delhi Strikers" placeholderTextColor="#666C78" style={styles.input} returnKeyType="next"/></View>
   <View style={styles.field}><Text style={styles.label}>GROUND / VENUE</Text><TextInput value={ground} onChangeText={setGround} placeholder="e.g. Noida Cricket Ground" placeholderTextColor="#666C78" style={styles.input} returnKeyType="next"/></View>
@@ -42,7 +52,7 @@ export default function MatchDetailsScreen(){
 
   <View style={styles.field}><Text style={styles.label}>OVERS</Text><TextInput value={overs} onChangeText={v=>setOvers(v.replace(/\D/g,"").slice(0,3))} placeholder="e.g. 20" placeholderTextColor="#666C78" style={styles.input} keyboardType="number-pad" returnKeyType="done" onSubmitEditing={Keyboard.dismiss}/></View>
 
-  <Pressable onPress={save} disabled={!matchName.trim()||!myTeam.trim()||!opponent.trim()||!ground.trim()} style={[styles.button,(!matchName.trim()||!myTeam.trim()||!opponent.trim()||!ground.trim())&&styles.disabled]}><Text style={styles.buttonText}>Save match  →</Text></Pressable>
+  <Pressable onPress={save} disabled={!myTeam.trim()||!opponent.trim()||!ground.trim()||!timestamp} style={[styles.button,(!myTeam.trim()||!opponent.trim()||!ground.trim()||!timestamp)&&styles.disabled]}><Text style={styles.buttonText}>Save match  →</Text></Pressable>
   <Text style={styles.note}>You can add players and manage invites after saving the match.</Text>
  </ScrollView></SafeAreaView>;
 }
