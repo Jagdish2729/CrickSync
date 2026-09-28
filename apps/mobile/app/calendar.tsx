@@ -1,6 +1,6 @@
-import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { getMatches, SavedMatch } from "../lib/matches";
+import { deleteMatch, getMatches, SavedMatch } from "../lib/matches";
 import { router } from "expo-router";
 
 type Mode = "WEEK" | "MONTH";
@@ -17,6 +17,7 @@ export default function CalendarScreen(){
  const [matches,setMatches]=useState<SavedMatch[]>([]);
  const timeScrollRef=useRef<ScrollView>(null);
  const today=useMemo(()=>new Date(),[]);
+ const removeMatch=(match:SavedMatch)=>{Alert.alert("Delete match?",`${match.myTeam} · ${match.time}`,[{text:"Cancel",style:"cancel"},{text:"Delete",style:"destructive",onPress:async()=>{await deleteMatch(match.id);setMatches(current=>current.filter(item=>item.id!==match.id));}}]);};
  useEffect(()=>{getMatches().then(setMatches);},[]);
  useEffect(()=>{const timer=setTimeout(()=>timeScrollRef.current?.scrollTo({y:5*64,animated:false}),100);return()=>clearTimeout(timer);},[]);
  const weekStart=useMemo(()=>startOfSundayWeek(today),[today]);
@@ -33,7 +34,7 @@ export default function CalendarScreen(){
   {mode==="WEEK" ? <View style={styles.calendarWrap}><View style={styles.daysHeader}><View style={styles.timeGutter}/>{weekDays.map(d=><View key={d.toISOString()} style={[styles.dayHeader,sameDay(d,today)&&styles.todayHeader]}><Text style={styles.dayName}>{dayNames[d.getDay()]}</Text><Text style={[styles.dayNumber,sameDay(d,today)&&styles.todayNumber]}>{d.getDate()}</Text></View>)}</View>
    <ScrollView ref={timeScrollRef} showsVerticalScrollIndicator={false} contentContainerStyle={styles.timeBody}>{hours.map(hour=><View key={hour} style={styles.hourRow}><View style={styles.timeLabel}><Text style={styles.timeText}>{formatHour(hour)}</Text></View>{weekDays.map(date=>{
     const match=matches.find(m=>{const d=new Date(m.startsAt);return sameDay(d,date)&&d.getHours()===hour;});
-    return <Pressable key={date.toISOString()+hour} onPress={()=>openSlot(date,hour)} style={({pressed})=>[styles.slot,sameDay(date,today)&&styles.todaySlot,pressed&&styles.slotPressed]}>
+    return <Pressable key={date.toISOString()+hour} onPress={()=>match?removeMatch(match):openSlot(date,hour)} style={({pressed})=>[styles.slot,sameDay(date,today)&&styles.todaySlot,pressed&&styles.slotPressed]}>
       <View style={styles.slotLine}/>
       {match&&<View style={styles.event}><Text style={styles.eventTitle} numberOfLines={1}>{match.myTeam} vs {match.opponent}</Text><Text style={styles.eventMeta} numberOfLines={1}>{match.ground}</Text></View>}
     </Pressable>
