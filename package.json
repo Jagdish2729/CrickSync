@@ -1,0 +1,17 @@
+{
+  "name": "cricksync",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "mobile": "npm --workspace apps/mobile start",
+    "api": "npm --workspace apps/api dev",
+    "typecheck": "npm --workspaces run typecheck"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
