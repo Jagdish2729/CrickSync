@@ -1,10 +1,11 @@
 import { Keyboard, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useState } from "react";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 
 export default function ProfileScreen() {
+ const {phone}=useLocalSearchParams<{phone?:string}>();
  const [name,setName]=useState("");const [city,setCity]=useState("");
- const next=()=>{if(name.trim()&&city.trim()){Keyboard.dismiss();router.push("/onboarding/role")}};
+ const next=()=>{if(name.trim()&&city.trim()){Keyboard.dismiss();router.push({pathname:"/onboarding/role",params:{phone,name:name.trim(),city:city.trim()}})}};
  return <SafeAreaView style={styles.container}>
   <Pressable style={styles.dismissArea} onPress={Keyboard.dismiss}>
    <View style={styles.content}>
