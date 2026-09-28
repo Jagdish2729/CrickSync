@@ -1,5 +1,5 @@
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useFocusEffect } from "expo-router";
 import { getMatches } from "../lib/matches";
 import { router } from "expo-router";
@@ -7,7 +7,8 @@ import { router } from "expo-router";
 export default function HomeScreen(){
  const [matches,setMatches]=useState<Awaited<ReturnType<typeof getMatches>>>([]);
  const refreshMatches=useCallback(async()=>{const all=await getMatches();const upcoming=all.filter(m=>{const time=new Date(m.startsAt).getTime();return !Number.isNaN(time)&&time>Date.now();}).sort((a,b)=>new Date(a.startsAt).getTime()-new Date(b.startsAt).getTime());setMatches(upcoming);},[]);
- useFocusEffect(useCallback(()=>{refreshMatches();const timer=setInterval(refreshMatches,30000);return()=>clearInterval(timer);},[refreshMatches]));
+ useEffect(()=>{refreshMatches();const timer=setInterval(refreshMatches,30000);return()=>clearInterval(timer);},[refreshMatches]);
+ useFocusEffect(useCallback(()=>{refreshMatches();},[refreshMatches]));
  return <SafeAreaView style={styles.container}><ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
   <View style={styles.top}><View><Text style={styles.eyebrow}>GOOD TO HAVE YOU</Text><Text style={styles.brand}>CrickSync <Text style={styles.dot}>●</Text></Text></View><View style={styles.avatar}><Text style={styles.avatarText}>J</Text></View></View>
   <Text style={styles.greeting}>Ready to{"\n"}play?</Text>
