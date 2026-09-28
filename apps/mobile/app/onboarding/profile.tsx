@@ -9,8 +9,8 @@ export default function ProfileScreen() {
   <View style={styles.progress}><View style={styles.progressOn}/><View/><View/></View>
   <Text style={styles.step}>01 / 02</Text><Text style={styles.title}>Tell us who{"\n"}you are.</Text>
   <Text style={styles.subtitle}>Let's create your cricket identity. Keep it simple.</Text>
-  <View style={styles.field}><Text style={styles.label}>YOUR NAME</Text><TextInput value={name} onChangeText={setName} placeholder="e.g. Jagdish Negi" placeholderTextColor="#666C78" style={styles.input}/></View>
-  <View style={styles.field}><Text style={styles.label}>CITY</Text><TextInput value={city} onChangeText={setCity} placeholder="e.g. Delhi NCR" placeholderTextColor="#666C78" style={styles.input} onSubmitEditing={next}/></View>
+  <View style={styles.field}><Text style={styles.label}>YOUR NAME</Text><TextInput value={name} onChangeText={setName} placeholder="e.g. Jagdish Negi" placeholderTextColor="#666C78" style={styles.input} returnKeyType="next" blurOnSubmit={false}/></View>
+  <View style={styles.field}><Text style={styles.label}>CITY</Text><TextInput value={city} onChangeText={setCity} placeholder="e.g. Delhi NCR" placeholderTextColor="#666C78" style={styles.input} returnKeyType="done" blurOnSubmit onSubmitEditing={next}/></View>
   <Pressable onPress={next} disabled={!name.trim()||!city.trim()} style={[styles.button,(!name.trim()||!city.trim())&&styles.disabled]}><Text style={styles.buttonText}>Next step  →</Text></Pressable>
  </View></SafeAreaView>;
 }
