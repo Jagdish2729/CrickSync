@@ -28,4 +28,10 @@ export async function saveMatch(match: SavedMatch): Promise<void> {
   await AsyncStorage.setItem(KEY, JSON.stringify([match, ...matches]));
 }
 
-export async function deleteMatch(id: string): Promise<void> {\n  const matches = await getMatches();\n  await AsyncStorage.setItem(KEY, JSON.stringify(matches.filter(match => match.id !== id)));\n}\n
+export async function deleteMatch(id: string): Promise<void> {
+  const matches = await getMatches();
+  await AsyncStorage.setItem(
+    KEY,
+    JSON.stringify(matches.filter(match => match.id !== id))
+  );
+}
