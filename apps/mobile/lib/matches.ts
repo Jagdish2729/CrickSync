@@ -6,7 +6,7 @@ export type SavedMatch = {
   date: string;
   time: string;
   myTeam: string;
-  opponent: string;
+  opponent?: string;
   ground: string;
   ball: "WHITE" | "RED";
   overs: string;
