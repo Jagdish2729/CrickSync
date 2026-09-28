@@ -6,9 +6,9 @@ import { router } from "expo-router";
 
 export default function HomeScreen(){
  const [matches,setMatches]=useState<Awaited<ReturnType<typeof getMatches>>>([]);
- const refreshMatches=useCallback(()=>{getMatches().then(all=>{const upcoming=all.filter(m=>{const t=Date.parse(m.startsAt);return !Number.isNaN(t)&&t>Date.now();}).sort((a,b)=>Date.parse(a.startsAt)-Date.parse(b.startsAt));setMatches(upcoming);});},[]);
+ const refreshMatches=useCallback(async()=>{const all=await getMatches();const upcoming=all.filter(m=>{const time=new Date(m.startsAt).getTime();return !Number.isNaN(time)&&time>Date.now();}).sort((a,b)=>new Date(a.startsAt).getTime()-new Date(b.startsAt).getTime());setMatches(upcoming);},[]);
  useFocusEffect(useCallback(()=>{refreshMatches();const timer=setInterval(refreshMatches,30000);return()=>clearInterval(timer);},[refreshMatches]));
- return <SafeAreaView style={styles.container}><View style={styles.content}>
+ return <SafeAreaView style={styles.container}><ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
   <View style={styles.top}><View><Text style={styles.eyebrow}>GOOD TO HAVE YOU</Text><Text style={styles.brand}>CrickSync <Text style={styles.dot}>●</Text></Text></View><View style={styles.avatar}><Text style={styles.avatarText}>J</Text></View></View>
   <Text style={styles.greeting}>Ready to{"\n"}play?</Text>
   <Pressable onPress={()=>router.push("/calendar")} style={({pressed})=>[styles.hero,pressed&&styles.pressed]}>
@@ -17,7 +17,7 @@ export default function HomeScreen(){
   <Text style={styles.sectionTitle}>UPCOMING MATCHES</Text>
   {matches.length>0 ? <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.matchesList}>{matches.map(match=><Pressable key={match.id} onPress={()=>router.push("/calendar")} style={styles.matchCard}><View style={styles.matchDate}><Text style={styles.matchDay}>{new Date(match.startsAt).getDate()}</Text><Text style={styles.matchMonth}>{new Date(match.startsAt).toLocaleDateString("en-IN",{month:"short"}).toUpperCase()}</Text></View><View style={styles.matchInfo}><Text style={styles.matchTeams}>{match.myTeam}</Text><Text style={styles.matchMeta}>{new Date(match.startsAt).toLocaleTimeString("en-IN",{hour:"numeric",minute:"2-digit"})}  ·  {match.ground}</Text></View></Pressable>)}</ScrollView> : <View style={styles.empty}><Text style={styles.emptyTitle}>No upcoming matches</Text><Text style={styles.emptyText}>Schedule your next game from the calendar.</Text></View>}
   <View style={styles.row}><View style={styles.small}><Text style={styles.smallNumber}>{matches.length}</Text><Text style={styles.smallLabel}>MATCHES</Text></View><View style={styles.small}><Text style={styles.smallNumber}>0</Text><Text style={styles.smallLabel}>TEAMS</Text></View><View style={styles.small}><Text style={styles.smallNumber}>0</Text><Text style={styles.smallLabel}>INVITES</Text></View></View>
- </View></SafeAreaView>;
+ </ScrollView></SafeAreaView>;
 }
 const styles=StyleSheet.create({
  container:{flex:1,backgroundColor:"#0B0D12"},content:{flex:1,paddingHorizontal:24,paddingTop:20},
