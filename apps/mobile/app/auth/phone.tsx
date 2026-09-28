@@ -23,7 +23,8 @@ export default function PhoneScreen() {
             <Text style={styles.prefix}>+91</Text><View style={styles.divider} />
             <TextInput value={phone} onChangeText={v => setPhone(v.replace(/\D/g, "").slice(0,10))}
               placeholder="98765 43210" placeholderTextColor="#777B86" keyboardType="phone-pad"
-              maxLength={10} style={styles.input} returnKeyType="done" onSubmitEditing={continueToOtp}/>
+              returnKeyType="done" blurOnSubmit onSubmitEditing={continueToOtp}
+              maxLength={10} style={styles.input}/>
           </View>
           <Text style={styles.hint}>We'll send you a one-time verification code.</Text>
         </View>
