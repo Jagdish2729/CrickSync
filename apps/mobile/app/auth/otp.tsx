@@ -13,7 +13,18 @@ export default function OtpScreen() {
     <View style={styles.badge}><Text style={styles.badgeText}>VERIFY</Text></View>
     <Text style={styles.title}>One more step.</Text><Text style={styles.subtitle}>Enter the code sent to{"\n"}<Text style={styles.phone}>+91 {phone??""}</Text></Text>
     <Pressable onPress={()=>inputRef.current?.focus()} style={styles.otpBox}><Text style={[styles.otpText,!otp&&styles.placeholder]}>{otp?otp.padEnd(6,"•"):"• • • • • •"}</Text></Pressable>
-    <TextInput ref={inputRef} value={otp} onChangeText={v=>setOtp(v.replace(/\D/g,"").slice(0,6))} keyboardType="number-pad" maxLength={6} style={styles.hiddenInput} autoFocus/>
+    <TextInput
+      ref={inputRef}
+      value={otp}
+      onChangeText={v=>setOtp(v.replace(/\D/g,"").slice(0,6))}
+      keyboardType="number-pad"
+      returnKeyType="done"
+      blurOnSubmit
+      onSubmitEditing={verify}
+      maxLength={6}
+      style={styles.hiddenInput}
+      autoFocus
+    />
     <Pressable onPress={verify} disabled={otp.length!==6} style={[styles.button,otp.length!==6&&styles.disabled]}><Text style={styles.buttonText}>Verify & continue  →</Text></Pressable>
     <Text style={styles.resend}>{seconds>0?"Resend code in "+seconds+"s":"Didn't get it? Resend code"}</Text>
   </View></SafeAreaView>;
