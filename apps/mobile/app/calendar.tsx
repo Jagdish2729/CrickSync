@@ -22,7 +22,7 @@ export default function CalendarScreen(){
  const monthDays=useMemo(()=>{const first=new Date(today.getFullYear(),today.getMonth(),1);const start=startOfSundayWeek(first);return Array.from({length:42},(_,i)=>{const d=new Date(start);d.setDate(start.getDate()+i);return d});},[today]);
  const weekEnd=new Date(weekStart);weekEnd.setDate(weekStart.getDate()+6);
  const range=mode==="WEEK"?`${formatDate(weekStart)} — ${formatDate(weekEnd)}`:`${monthNames[today.getMonth()]} ${today.getFullYear()}`;
- const openSlot=(date:Date,hour:number)=>{const selected=new Date(date);selected.setHours(hour,0,0,0);router.push({pathname:"/match/create",params:{date:selected.toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short",year:"numeric"}),time:selected.toLocaleTimeString("en-IN",{hour:"numeric",minute:"2-digit"}),timestamp:String(selected.getTime())}});};
+ const openSlot=(date:Date,hour:number)=>{const selected=new Date(date);selected.setHours(hour,0,0,0);const dateLabel=selected.toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short",year:"numeric"});const timeLabel=selected.toLocaleTimeString("en-IN",{hour:"numeric",minute:"2-digit"});router.push({pathname:"/match/create",params:{date:dateLabel,time:timeLabel,timestamp:selected.getTime().toString()}});};
 
  return <SafeAreaView style={styles.container}><View style={styles.content}>
   <View style={styles.header}><Pressable onPress={()=>router.back()}><Text style={styles.back}>‹</Text></Pressable><View style={styles.headerCopy}><Text style={styles.eyebrow}>MY CRICKET</Text><Text style={styles.title}>Calendar</Text></View></View>
