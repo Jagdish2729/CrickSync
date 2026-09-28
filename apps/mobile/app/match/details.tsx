@@ -2,11 +2,12 @@ import { Keyboard, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextIn
 import { useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import { saveMatch } from "../../lib/matches";
+import { saveCaptainMatch } from "../../lib/captainMatches";
 
 type BallType="WHITE"|"RED";
 
 export default function MatchDetailsScreen(){
- const {date,time,timestamp}=useLocalSearchParams<{date?:string;time?:string;timestamp?:string}>();
+ const {date,time,timestamp,mode}=useLocalSearchParams<{date?:string;time?:string;timestamp?:string;mode?:string}>();
  const [myTeam,setMyTeam]=useState("");
  const [ground,setGround]=useState("");
  const [ball,setBall]=useState<BallType>("WHITE");
@@ -15,7 +16,7 @@ export default function MatchDetailsScreen(){
  const save=async()=>{
    if(myTeam.trim()&&ground.trim()&&timestamp){
      Keyboard.dismiss();
-     await saveMatch({
+     await (mode==="CAPTAIN"?saveCaptainMatch:saveMatch)({
        id: Date.now().toString(),
        startsAt:new Date(Number(timestamp)).toISOString(),
        date:date||"",
